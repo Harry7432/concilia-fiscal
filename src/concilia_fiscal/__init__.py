@@ -1,5 +1,13 @@
 """Public interface for Concilia Fiscal."""
 
+from concilia_fiscal.document_extraction import (
+    DocumentExtractionDecision,
+    DocumentExtractionReason,
+    DocumentExtractionReasonCode,
+    DocumentExtractionResult,
+    DocumentExtractionStatus,
+    extract_documents,
+)
 from concilia_fiscal.enrichment import (
     EnrichmentErrorCode,
     EnrichmentIssue,
@@ -35,6 +43,11 @@ from concilia_fiscal.selection import (
 from concilia_fiscal.validation import validate_file
 
 __all__ = [
+    "DocumentExtractionDecision",
+    "DocumentExtractionReason",
+    "DocumentExtractionReasonCode",
+    "DocumentExtractionResult",
+    "DocumentExtractionStatus",
     "ErrorCode",
     "EnrichmentErrorCode",
     "EnrichmentIssue",
@@ -59,6 +72,7 @@ __all__ = [
     "ValidationResult",
     "classify_fiscal",
     "enrich_accounting",
+    "extract_documents",
     "normalize_data",
     "read_workbook",
     "select_accounting",

@@ -2,9 +2,9 @@
 
 Aplicação local em Streamlit para importar, validar e normalizar planilhas contábeis, fiscais e
 de plano de contas. A interface Python também enriquece e classifica os lançamentos pelas regras
-contábeis do baseline e classifica linhas fiscais pela elegibilidade do PIS. A interface web
-apresenta somente a validação. Extração de nota fiscal e conciliação fiscal ainda não fazem parte
-desta versão.
+contábeis do baseline, extrai documentos dos históricos selecionados e classifica linhas fiscais
+pela elegibilidade do PIS. A interface web apresenta somente a validação. A conciliação fiscal
+ainda não faz parte desta versão.
 
 ## Requisitos
 
@@ -101,6 +101,24 @@ levam a linha para `review`; uma exclusão contábil normal não invalida o resu
 `selection_status: String` e `selection_reason_codes: List(String)` são anexadas aos frames de
 saída. Esta etapa não consulta dados fiscais, não filtra PIS, não extrai NF e não realiza
 conciliação.
+
+## Extração de documento fiscal
+
+`extract_documents(selection)` recebe um `SelectionResult`, processa somente seu subconjunto
+`selected` e retorna um `DocumentExtractionResult`. O resultado contém o frame completo
+classificado, o subconjunto com extrações confiáveis e decisões estruturadas por linha. Os frames
+de entrada não são alterados, e ordem, quantidade, linhagem e colunas são preservadas.
+
+A extração exige um marcador explícito `NF`, `N.F.`, `NOTA` ou `NOTA FISCAL`, seguido
+imediatamente pelo número ou por um qualificador como `NÚMERO`, `Nº`, `NO` ou `N.`. Números
+soltos, datas, CFOPs, tokens numéricos pontuados e variantes não declaradas não são usados como
+fallback. Repetições do mesmo número formam uma extração única; números distintos deixam a linha
+como `ambiguous` sem escolher um deles.
+
+Cada linha recebe `extracted`, `not_found` ou `ambiguous`, com um motivo estruturado. As colunas
+`extracted_document: String`, `document_extraction_status: String` e
+`document_extraction_reason_codes: List(String)` são anexadas aos frames de saída. Esta etapa não
+consulta o fiscal, não realiza match ou conciliação e não altera a interface web.
 
 ## Classificação fiscal por PIS
 
