@@ -7,6 +7,14 @@ from concilia_fiscal.enrichment import (
     enrich_accounting,
 )
 from concilia_fiscal.excel import read_workbook
+from concilia_fiscal.fiscal_filter import (
+    FiscalDecision,
+    FiscalFilterResult,
+    FiscalReason,
+    FiscalReasonCode,
+    FiscalStatus,
+    classify_fiscal,
+)
 from concilia_fiscal.models import ErrorCode, FileKind, ValidationError, ValidationResult
 from concilia_fiscal.normalization import (
     NormalizationError,
@@ -32,6 +40,11 @@ __all__ = [
     "EnrichmentIssue",
     "EnrichmentResult",
     "FileKind",
+    "FiscalDecision",
+    "FiscalFilterResult",
+    "FiscalReason",
+    "FiscalReasonCode",
+    "FiscalStatus",
     "NormalizationError",
     "NormalizationErrorCode",
     "NormalizationIssue",
@@ -44,6 +57,7 @@ __all__ = [
     "SelectionStatus",
     "ValidationError",
     "ValidationResult",
+    "classify_fiscal",
     "enrich_accounting",
     "normalize_data",
     "read_workbook",

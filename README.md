@@ -2,8 +2,9 @@
 
 Aplicação local em Streamlit para importar, validar e normalizar planilhas contábeis, fiscais e
 de plano de contas. A interface Python também enriquece e classifica os lançamentos pelas regras
-contábeis do baseline. A interface web apresenta somente a validação. Extração de nota fiscal,
-filtro de PIS e conciliação fiscal ainda não fazem parte desta versão.
+contábeis do baseline e classifica linhas fiscais pela elegibilidade do PIS. A interface web
+apresenta somente a validação. Extração de nota fiscal e conciliação fiscal ainda não fazem parte
+desta versão.
 
 ## Requisitos
 
@@ -100,6 +101,22 @@ levam a linha para `review`; uma exclusão contábil normal não invalida o resu
 `selection_status: String` e `selection_reason_codes: List(String)` são anexadas aos frames de
 saída. Esta etapa não consulta dados fiscais, não filtra PIS, não extrai NF e não realiza
 conciliação.
+
+## Classificação fiscal por PIS
+
+`classify_fiscal(fiscal)` recebe o `DataFrame` fiscal normalizado e retorna um
+`FiscalFilterResult` com o frame completo classificado, o subconjunto elegível e as decisões
+estruturadas por linha. O frame de entrada não é alterado; sua ordem, quantidade, linhagem e
+colunas são preservadas.
+
+Somente linhas com `pis_rate` maior que zero recebem o estado `eligible`. Valores iguais a zero,
+negativos ou nulos recebem `ineligible`. Cada linha registra exatamente um motivo estável:
+`pis_positive`, `pis_zero`, `pis_negative` ou `pis_invalid`. As colunas
+`fiscal_status: String` e `fiscal_reason_codes: List(String)` são anexadas aos frames de saída.
+
+A função exige `source_row: Int64` sem valores nulos e `pis_rate: Decimal(18,2)`; violações desse
+contrato interrompem a classificação com erro explícito, sem resultado parcial. Esta etapa não
+extrai nota fiscal, não consulta ou concilia lançamentos contábeis e não altera a interface web.
 
 ## Fixtures fictícias
 
