@@ -1,9 +1,9 @@
 # Concilia Fiscal
 
 Aplicação local em Streamlit para importar, validar e normalizar planilhas contábeis, fiscais e
-de plano de contas. A interface web apresenta a validação; a normalização está disponível como
-interface Python para as próximas etapas. Regras de exclusão e conciliação ainda não fazem
-parte desta versão.
+de plano de contas. A interface Python também enriquece os lançamentos normalizados com o plano
+de contas. A interface web apresenta somente a validação. Regras de exclusão e conciliação ainda
+não fazem parte desta versão.
 
 ## Requisitos
 
@@ -61,6 +61,24 @@ permanece em pontos percentuais. Códigos preservam zeros à esquerda e pontuaç
 aceita somente dígitos; CNPJ aceita 14 dígitos ou a máscara `00.000.000/0000-00` e retorna apenas
 dígitos. Formatos ambíguos produzem `NormalizationError` com todos os erros detectáveis, sem
 resultado parcial.
+
+## Enriquecimento pelo plano de contas
+
+`enrich_accounting(data)` recebe um `NormalizedData` e retorna um `EnrichmentResult`. Cada
+lançamento é associado exatamente pelo `account_code` já normalizado e recebe, ao final do
+schema, `account_nature: String`, `account_description: String`, `account_type: String` e
+`account_source_row: Int64`. A ordem e a quantidade dos lançamentos são preservadas, e nenhum
+dos três frames normalizados de entrada é alterado.
+
+Uma conta ausente mantém o lançamento com os quatro atributos enriquecidos nulos. Um código
+duplicado no plano é sempre reportado, mesmo que não seja usado; lançamentos com esse código
+também recebem atributos nulos para impedir associações ambíguas e multiplicação de linhas.
+Essas situações produzem `EnrichmentIssue`s agrupadas e ordenadas pelo código, com as linhas
+físicas afetadas nas duas fontes. O resultado permanece disponível integralmente, mas
+`is_valid` será falso enquanto houver qualquer problema.
+
+O enriquecimento não aplica filtros por natureza, tipo ou descrição, não exclui lançamentos e
+não executa conciliação fiscal.
 
 ## Fixtures fictícias
 
