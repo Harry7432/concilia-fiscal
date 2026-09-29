@@ -1,9 +1,9 @@
 # Concilia Fiscal
 
 Aplicação local em Streamlit para importar, validar e normalizar planilhas contábeis, fiscais e
-de plano de contas. A interface Python também enriquece os lançamentos normalizados com o plano
-de contas. A interface web apresenta somente a validação. Regras de exclusão e conciliação ainda
-não fazem parte desta versão.
+de plano de contas. A interface Python também enriquece e classifica os lançamentos pelas regras
+contábeis do baseline. A interface web apresenta somente a validação. Extração de nota fiscal,
+filtro de PIS e conciliação fiscal ainda não fazem parte desta versão.
 
 ## Requisitos
 
@@ -80,6 +80,27 @@ físicas afetadas nas duas fontes. O resultado permanece disponível integralmen
 O enriquecimento não aplica filtros por natureza, tipo ou descrição, não exclui lançamentos e
 não executa conciliação fiscal.
 
+## Seleção contábil
+
+`select_accounting(enrichment, config)` recebe um `EnrichmentResult` e retorna um
+`SelectionResult` com o frame completo classificado, o subconjunto selecionado, as decisões
+estruturadas por linha e os diagnósticos anteriores do enriquecimento. Os frames de entrada não
+são alterados. A ordem original é preservada e cada lançamento recebe exatamente um estado:
+`selected`, `excluded` ou `review`.
+
+As regras exigem histórico e D/C preenchidos, excluem créditos e saldos menores ou iguais a zero
+e aceitam somente natureza `04 - CONTAS DE RESULTADO` e tipo `A - ANALITICA`. As categorias
+excluídas são procuradas como substring apenas na descrição da conta. A configuração padrão usa
+`MATERIAL` e `MULTAS`; `SelectionConfig` permite substituir essa tupla ou desativar a regra com
+uma tupla vazia.
+
+Todos os motivos aplicáveis são registrados em ordem fixa por códigos estáveis. Dados que não
+permitem uma decisão segura, como D/C desconhecido, saldo indisponível ou enriquecimento ausente,
+levam a linha para `review`; uma exclusão contábil normal não invalida o resultado. As colunas
+`selection_status: String` e `selection_reason_codes: List(String)` são anexadas aos frames de
+saída. Esta etapa não consulta dados fiscais, não filtra PIS, não extrai NF e não realiza
+conciliação.
+
 ## Fixtures fictícias
 
 Os arquivos em `tests/fixtures/` são inteiramente fictícios e destinados exclusivamente a
@@ -90,8 +111,8 @@ desenvolvimento e testes:
 - `plano_contas_teste.xlsx`
 - `resultado_esperado_teste.xlsx`
 
-As fixtures futuras de conciliação cobrem match exato por NF e valor, valor divergente, PIS
-zero, crédito, saldo negativo, categorias excluídas, natureza ou tipo fora do escopo, risco de
-falso positivo de NF e histórico sem NF. Nenhum CNPJ, fornecedor ou valor representa dados
-reais. `resultado_esperado_teste.xlsx` está armazenado para features futuras e não participa
-da validação atual.
+As fixtures cobrem seleção contábil e cenários futuros de conciliação, como match exato por NF e
+valor, valor divergente, PIS zero, crédito, saldo negativo, categorias excluídas, natureza ou tipo
+fora do escopo, risco de falso positivo de NF e histórico sem NF. Nenhum CNPJ, fornecedor ou
+valor representa dados reais. `resultado_esperado_teste.xlsx` documenta resultados de etapas
+futuras e não participa diretamente da validação.

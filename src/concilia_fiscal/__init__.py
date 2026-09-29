@@ -15,6 +15,15 @@ from concilia_fiscal.normalization import (
     NormalizedData,
     normalize_data,
 )
+from concilia_fiscal.selection import (
+    SelectionConfig,
+    SelectionDecision,
+    SelectionReason,
+    SelectionReasonCode,
+    SelectionResult,
+    SelectionStatus,
+    select_accounting,
+)
 from concilia_fiscal.validation import validate_file
 
 __all__ = [
@@ -27,10 +36,17 @@ __all__ = [
     "NormalizationErrorCode",
     "NormalizationIssue",
     "NormalizedData",
+    "SelectionConfig",
+    "SelectionDecision",
+    "SelectionReason",
+    "SelectionReasonCode",
+    "SelectionResult",
+    "SelectionStatus",
     "ValidationError",
     "ValidationResult",
     "enrich_accounting",
     "normalize_data",
     "read_workbook",
+    "select_accounting",
     "validate_file",
 ]
