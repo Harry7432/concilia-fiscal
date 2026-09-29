@@ -1,8 +1,3 @@
-import re
-from datetime import date
-from decimal import Decimal, InvalidOperation
-from typing import cast
-
 from concilia_fiscal.contracts import CONTRACTS, ValueKind
 from concilia_fiscal.excel import (
     DuplicateColumnError,
@@ -14,9 +9,7 @@ from concilia_fiscal.excel import (
     read_workbook,
 )
 from concilia_fiscal.models import ErrorCode, FileKind, ValidationError, ValidationResult
-
-ISO_DATE_PATTERN = re.compile(r"\d{4}-\d{2}-\d{2}")
-DECIMAL_PATTERN = re.compile(r"[+-]?\d+(?:[.,]\d{1,2})?")
+from concilia_fiscal.values import parse_decimal, parse_iso_date
 
 
 def _is_valid_value(value: object, value_kind: ValueKind) -> bool:
@@ -24,23 +17,14 @@ def _is_valid_value(value: object, value_kind: ValueKind) -> bool:
         return False
     if value_kind is ValueKind.TEXT:
         return isinstance(value, str) and bool(value.strip())
-    if value_kind is ValueKind.DATE:
-        if not isinstance(value, str) or ISO_DATE_PATTERN.fullmatch(value) is None:
-            return False
-        try:
-            date.fromisoformat(value)
-        except ValueError:
-            return False
-        return True
-
-    decimal_text = str(value).strip()
-    if DECIMAL_PATTERN.fullmatch(decimal_text) is None:
-        return False
     try:
-        decimal = Decimal(decimal_text.replace(",", "."))
-    except (InvalidOperation, ValueError):
+        if value_kind is ValueKind.DATE:
+            parse_iso_date(value)
+        else:
+            parse_decimal(value)
+    except ValueError:
         return False
-    return decimal.is_finite() and cast(int, decimal.as_tuple().exponent) >= -2
+    return True
 
 
 def validate_file(

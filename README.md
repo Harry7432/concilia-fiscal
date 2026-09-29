@@ -1,8 +1,9 @@
 # Concilia Fiscal
 
-Aplicação local em Streamlit para importar e validar planilhas contábeis, fiscais e de plano
-de contas. Esta primeira feature verifica os contratos dos arquivos e apresenta todos os erros
-detectáveis com segurança. Regras de conciliação ainda não fazem parte desta versão.
+Aplicação local em Streamlit para importar, validar e normalizar planilhas contábeis, fiscais e
+de plano de contas. A interface web apresenta a validação; a normalização está disponível como
+interface Python para as próximas etapas. Regras de exclusão e conciliação ainda não fazem
+parte desta versão.
 
 ## Requisitos
 
@@ -40,6 +41,26 @@ uv run mypy
 Colunas extras são aceitas e reportadas. Campos obrigatórios vazios, datas fora do formato
 `YYYY-MM-DD` e decimais inválidos são apresentados com arquivo, linha física do Excel, coluna,
 código estável e mensagem em português. Os dados lidos são preservados sem correção silenciosa.
+
+## Normalização
+
+`normalize_data(accounting, fiscal, accounts)` recebe três `ValidationResult` válidos e retorna
+um `NormalizedData`. Os `DataFrame`s brutos não são alterados. Linhas vazias são omitidas e
+`source_row` preserva a linha física do Excel. Colunas extras permanecem no bruto, mas não entram
+na representação canônica.
+
+| Tabela | Schema canônico |
+|---|---|
+| Contábil | `source_row: Int64`, `account_code: String`, `history: String`, `debit_credit: String`, `amount: Decimal(18,2)`, `cnpj: String`, `date: Date`, `entry_number: String` |
+| Fiscal | `source_row: Int64`, `pis_rate: Decimal(18,2)`, `document_number: String`, `amount: Decimal(18,2)`, `supplier: String`, `date: Date` |
+| Plano de contas | `source_row: Int64`, `account_code: String`, `account_nature: String`, `account_description: String`, `account_type: String` |
+
+Textos são normalizados em Unicode NFC, maiúsculas e espaços uniformes, preservando acentos.
+Datas viram `Date`; valores e alíquota de PIS viram `Decimal(18,2)` sem arredondamento. O PIS
+permanece em pontos percentuais. Códigos preservam zeros à esquerda e pontuação. Documento fiscal
+aceita somente dígitos; CNPJ aceita 14 dígitos ou a máscara `00.000.000/0000-00` e retorna apenas
+dígitos. Formatos ambíguos produzem `NormalizationError` com todos os erros detectáveis, sem
+resultado parcial.
 
 ## Fixtures fictícias
 

@@ -29,6 +29,7 @@ packages = ["src/concilia_fiscal"]
 testpaths = ["tests"]
 
 [tool.ruff]
+extend-exclude = ["agent-skills"]
 line-length = 100
 target-version = "py313"
 
